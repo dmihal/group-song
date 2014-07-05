@@ -36,3 +36,11 @@ Song = (function(){
   };
   return constructor;
 })();
+
+Song.get = function(id){
+  if (songDictionary[id]){
+    return songDictionary[id];
+  } else {
+    return new Song(id);
+  }
+}

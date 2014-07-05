@@ -40,17 +40,17 @@ Playlist = (function(){
   }
 
   constructor.prototype.currentSong = function(){
-    return Songs.findOne(this.status.song);
+    return Song.get(this.status.song);
   };
 
   constructor.prototype.nextSong = function(){
+    var song;
     if (this.status.song === null){
       song = Songs.findOne({
         playlist: id,
       },{
         sort: {order: 1},
       });
-      return song;
     } else {
       currentSong = this.currentSong
       song = Songs.findOne({
@@ -59,8 +59,8 @@ Playlist = (function(){
       },{
         sort: {order: 1}
       });
-      return song;
     }
+    return Song.get(song._id);
   };
 
   return constructor;
