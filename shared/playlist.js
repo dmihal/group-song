@@ -34,28 +34,34 @@ Playlist = (function(){
     return this;
   };
 
+  constructor.prototype.togglePlaying = function(){
+    this.status.state = 'paused' ? this.status.state == 'playing' : 'playing';
+    return this;
+  }
+
   constructor.prototype.currentSong = function(){
     return Songs.findOne(this.status.song);
-  }
+  };
 
   constructor.prototype.nextSong = function(){
     if (this.status.song === null){
-      song = Songs.find({
+      song = Songs.findOne({
         playlist: id,
       },{
         sort: {order: 1},
-        limit: 1,
       });
       return song;
     } else {
       currentSong = this.currentSong
-      song = Songs.find({
+      song = Songs.findOne({
         playlist: id,
         order: {$gt: currentSong.order}
+      },{
+        sort: {order: 1}
       });
       return song;
     }
-  }
+  };
 
   return constructor;
 })();
