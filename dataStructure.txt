@@ -1,0 +1,16 @@
+Playlist {
+	id: ID,
+	status: {
+		state: String[stopped,paused,playing]
+		song: ID
+	}
+}
+Song {
+	id: ID
+	playlist: ID
+	order: Number
+
+	type: String[youtube,soundcloud]
+	mediaID: String
+	url: String
+}
