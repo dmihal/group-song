@@ -1,0 +1,11 @@
+<body>
+  {{> main}}
+</body>
+
+<template name="main">
+  {{#if currentPlaylist}}
+    {{> player}}
+  {{else}}
+    {{> landingPage}}
+  {{/if}}
+</template>
