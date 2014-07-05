@@ -1,13 +1,34 @@
+var playlistDictionary = {};
+
 Playlist = (function(){
   var updater = "";
-  constructor = function(){
-    this.id = null;
-    this.status = {
-      state: 'stopped',
-      song: null
-    };
-    this.id = Playlists.insert(this);
+
+  var id = null;
+
+  var constructor = function(_id){
+    if (_id) {
+      // Load existing playlist
+      playlist = Playlists.findOne(_id);
+      if (playlist) {
+        id = _id;
+        this.status = playlist.status;
+      } else {
+        throw "Could not find playlist with id "+id;
+      }
+    } else {
+      // Make a new playlist
+      this.status = {
+        state: 'stopped',
+        song: null
+      };
+      id = Playlists.insert(this);
+    }
+    playlistDictionary[this.id] = this;
   };
+
+  constructor.prototype.getID = function(){
+    return id;
+  }
 
   constructor.prototype.save = function(){
     return this;
@@ -20,7 +41,7 @@ Playlist = (function(){
   constructor.prototype.nextSong = function(){
     if (this.status.song === null){
       song = Songs.find({
-        playlist: this.id,
+        playlist: id,
       },{
         sort: {order: 1},
         limit: 1,
@@ -29,10 +50,20 @@ Playlist = (function(){
     } else {
       currentSong = this.currentSong
       song = Songs.find({
-        playlist: this.id,
+        playlist: id,
+        order: {$gt: currentSong.order}
       });
+      return song;
     }
   }
 
   return constructor;
-})()
+})();
+
+Playlist.get = function(id){
+  if (playlistDictionary[id]) {
+    return playlistDictionary[id];
+  } else {
+    return new Playlist(id);
+  }
+}
