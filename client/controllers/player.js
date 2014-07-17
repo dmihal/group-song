@@ -2,19 +2,25 @@ var playing = null;
 var playerObj = null;
 Meteor.startup(function(){
   Deps.autorun(function() {
-    Playlists.find(Session.get('currentPlaylist')).observeChanges({
-      changed: function(id, fields){
-        playlist = Playlist.get(id);
-        if (fields.status) {
-          if (fields.status.state === 'playing' &&
-              (playing === null ||
-               fields.status.song !== playing.getID())){
-            $("#status").html("playing");
-            playing = playlist.nextSong();
-            $("#playerTarget").html(playing.mediaID);
-          }
-        }
+    playlist = Playlist.get(Session.get('currentPlaylist'));
+    if (!playlist){
+      return;
+    }
+
+    var status = playlist.getStatus();
+    if (status.state === 'playing' &&
+        (playing === null ||
+         status.song !== playing.getID())){
+      $("#status").html("playing");
+      playing = playlist.nextSong();
+      if (playing){
+        $("#playerTarget").html(playing.mediaID);
+      } else {
+        $("#playerTarget").html('');
       }
-    });
+    }
   });
 });
+Template.player.songs = function(){
+  return Songs.find({playlist:Session.get('currentPlaylist')});
+}

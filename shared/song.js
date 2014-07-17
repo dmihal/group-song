@@ -1,4 +1,5 @@
 songDictionary = {};
+num = 0;
 
 Song = (function(){
   var id;
@@ -12,6 +13,7 @@ Song = (function(){
         this.type = song.type;
         this.mediaID = song.mediaID;
         this.url = song.url;
+        this.title = 'song'+num++;
 
         songDictionary[id] = this;
       } else {
@@ -23,6 +25,7 @@ Song = (function(){
       this.type = null;
       this.mediaID = null;
       this.url = null;
+      this.title = 'song'+num++;
     }
   };
 

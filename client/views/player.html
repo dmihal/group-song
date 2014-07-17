@@ -1,4 +1,10 @@
 <template name="player">
   <div id="status">Stopped</div>
   <div id="playerTarget"></div>
+  <ul>
+    {{#each songs}}
+      <li>{{mediaID}}</li>
+    {{/each}}
+  </ul>
+  {{> controls}}
 </template>

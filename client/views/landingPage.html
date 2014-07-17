@@ -1,3 +1,8 @@
 <template name="landingPage">
   <button id="createPlaylist">New Playlist</button>
+  <ul>
+    {{#each playlists}}
+      <li><a href="#" class="playlistLink" data-playlist="{{_id}}">{{_id}}</a></li>
+    {{/each}}
+  </ul>
 </template>

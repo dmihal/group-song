@@ -12,5 +12,6 @@ Song {
 
 	type: String[youtube,soundcloud]
 	mediaID: String
+	title: String
 	url: String
 }
