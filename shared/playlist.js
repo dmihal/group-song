@@ -83,7 +83,7 @@ Playlist = (function(){
         sort: {order: 1},
       });
     } else {
-      currentSong = this.currentSong
+      currentSong = this.currentSong();
       song = Songs.findOne({
         playlist: id,
         order: {$gt: currentSong.order}

@@ -2,7 +2,7 @@ songDictionary = {};
 num = 0;
 
 Song = (function(){
-  var id;
+  var id, player = null;
   constructor = function(_id){
     if (_id) {
       song = Songs.findOne(_id);
@@ -17,7 +17,7 @@ Song = (function(){
 
         songDictionary[id] = this;
       } else {
-        throw "could not find song "+_id
+        throw "could not find song "+_id;
       }
     } else {
       this.playlist = null;
@@ -37,6 +37,18 @@ Song = (function(){
       songDictionary[id] = this;
     }
   };
+
+  constructor.prototype.getID = function(){
+    return id;
+  }
+
+  constructor.prototype.getPlayer = function(){
+    if (!player){
+      player = new players[this.type](this.mediaID);
+    }
+    return player;
+  }
+
   return constructor;
 })();
 
