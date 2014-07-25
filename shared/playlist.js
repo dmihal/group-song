@@ -1,64 +1,80 @@
 var playlistDictionary = {};
 
 Playlist = (function(){
-  var ATTRIBUTES = ['status'];
 
-  var that = null;
-  var updater = "";
-  var dependencies = {};
-
-  var id = null;
-
-  var constructor = function(_id){
+  var constructor = function(doc){
     that = this;
-    if (_id) {
-      // Load existing playlist
-      playlist = Playlists.findOne(_id);
-      if (playlist) {
-        id = _id;
-        for (var i = 0; i < ATTRIBUTES.length; i++) {
-          var key = ATTRIBUTES[i];
-          this[key] = playlist[key];
-        };
-      } else {
-        throw "Could not find playlist with id "+id;
-      }
-    } else {
-      // Make a new playlist
-      this.status = {
+    if (doc) {
+      this.doc = doc;
+      this.register();
+    }
+  };
+
+  var defaultGetter = function(name){
+    return function(){
+      this.dependencies[name].depend();
+      return this.doc[name];
+    };
+  };
+  var defaultSetter = function(name){
+    return function(newVal){
+      this.dependencies[name].changed();
+      return this.doc[name] = newVal;
+    }
+  }
+
+  Object.defineProperty(constructor, "dependencies",{
+    value : {
+      id : new Deps.Dependency(),
+      status : new Deps.Dependency()
+    }
+  });
+  Object.defineProperty(constructor, "doc", {
+    value: {
+      id : null,
+      status : {
         state: 'stopped',
         song: null
-      };
-      id = Playlists.insert(this);
-    }
-    for (var i = 0; i < ATTRIBUTES.length; i++) {
-      attribute = ATTRIBUTES[i];
-      dependencies[attribute] = new Deps.Dependency();
-      getterName = 'get' + attribute.substr(0,1).toUpperCase() + attribute.substring(1);
-      this[getterName] = (function(that, attr){
-        return function(){
-          dependencies[attribute].depend();
-          return this[attribute];
-        };
-      })(this, attribute);
+      }},
+    enumerable : false
+  });
+  Object.defineProperty(constructor, "id", {
+    enumerable : true,
+    get : defaultGetter('id')
+  });
+  Object.defineProperty(constructor, "status", {
+    enumerable : true,
+    writable : true,
+    get : defaultGetter('status'),
+    set : defaultSetter('status')
+  });
+
+
+  constructor.prototype.save = function(){
+    if (this.id) {
+      Playlists.update(this.id, this);
+    } else {
+      this.doc.id = Playlists.insert(this);
+      this.register();
     };
-    playlistDictionary[id] = this;
-    Playlists.find(id).observeChanges({
+    return this;
+  };
+  constructor.prototype.updateWithDoc = function(doc){
+    for(var attr in doc){
+      if (this[attr] !== doc[attr]){
+        this[attr] = doc[attr];
+      }
+    }
+  };
+  constructor.prototype.register = function(){
+    playlistDictionary[this.id] = this;
+    Playlists.find(this.id).observeChanges({
       changed: function(id, changes){
         for (var attr in changes){
           that[attr] = changes[attr];
-          dependencies[attr].changed();
         }
       }
     });
-  };
-
-  constructor.prototype.getID = function(){
-    return id;
-  }
-
-  constructor.prototype.save = function(){
-    return this;
   };
 
   constructor.prototype.togglePlaying = function(){
@@ -66,7 +82,7 @@ Playlist = (function(){
     if (!this.status.song){
       this.status.song = this.nextSong();
     }
-    dependencies.status.changed();
+    this.dependencies.status.changed();
     return this;
   }
 
