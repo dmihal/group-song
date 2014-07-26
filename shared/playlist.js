@@ -2,59 +2,64 @@ var playlistDictionary = {};
 
 Playlist = (function(){
 
-  var constructor = function(doc){
-    that = this;
+  var constructor = function Playlist(doc){
+    this.defineClass();
+
     if (doc) {
       this.doc = doc;
       this.register();
     }
   };
 
-  var defaultGetter = function(name){
-    return function(){
-      this.dependencies[name].depend();
-      return this.doc[name];
+  constructor.prototype.defineClass = function(){
+    var defaultGetter = function(name){
+      return function(){
+        this.dependencies[name].depend();
+        return this.doc[name];
+      };
     };
-  };
-  var defaultSetter = function(name){
-    return function(newVal){
-      this.dependencies[name].changed();
-      return this.doc[name] = newVal;
-    }
-  }
+    var defaultSetter = function(name){
+      return function(newVal){
+        this.dependencies[name].changed();
+        return this.doc[name] = newVal;
+      }
+    };
 
-  Object.defineProperty(constructor, "dependencies",{
-    value : {
-      id : new Deps.Dependency(),
-      status : new Deps.Dependency()
-    }
-  });
-  Object.defineProperty(constructor, "doc", {
-    value: {
-      id : null,
-      status : {
-        state: 'stopped',
-        song: null
-      }},
-    enumerable : false
-  });
-  Object.defineProperty(constructor, "id", {
-    enumerable : true,
-    get : defaultGetter('id')
-  });
-  Object.defineProperty(constructor, "status", {
-    enumerable : true,
-    writable : true,
-    get : defaultGetter('status'),
-    set : defaultSetter('status')
-  });
+    Object.defineProperty(this, "dependencies",{
+      value : {
+        _id : new Deps.Dependency(),
+        status : new Deps.Dependency()
+      }
+    });
+    Object.defineProperty(this, "doc", {
+      value: {
+        _id : null,
+        status : {
+          state: 'stopped',
+          song: null
+        }},
+      enumerable : false,
+      writable : true
+    });
+    Object.defineProperty(this, "_id", {
+      enumerable : true,
+      get : defaultGetter('_id')
+    });
+    Object.defineProperty(this, "status", {
+      enumerable : true,
+      get : defaultGetter('status'),
+      set : defaultSetter('status')
+    });
+
+  };
+
 
 
   constructor.prototype.save = function(){
-    if (this.id) {
-      Playlists.update(this.id, this);
+    if (this._id) {
+      Playlists.update(this._id, this);
     } else {
-      this.doc.id = Playlists.insert(this);
+      this.doc._id = Playlists.insert(this);
       this.register();
     };
     return this;
@@ -67,8 +72,8 @@ Playlist = (function(){
     }
   };
   constructor.prototype.register = function(){
-    playlistDictionary[this.id] = this;
-    Playlists.find(this.id).observeChanges({
+    playlistDictionary[this._id] = this;
+    Playlists.find(this._id).observeChanges({
       changed: function(id, changes){
         for (var attr in changes){
           that[attr] = changes[attr];
