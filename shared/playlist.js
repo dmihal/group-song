@@ -51,6 +51,41 @@ Playlist = (function(){
       set : defaultSetter('status')
     });
 
+    function defineStatus(){
+      var status = {};
+      var dependency = this.dependencies.status;
+
+      var statusGetter = function(name){
+        return function(){
+          dependency.depend();
+          return this.doc.status[name];
+        };
+      };
+      var statusSetter = function(name){
+        return function(newVal){
+          dependency.changed();
+          return this.doc.status[name] = newVal;
+        }
+      };
+
+      Object.defineProperties(status,{
+        state : {
+          value: "stopped",
+          writable: true,
+          enumerable: true,
+          get: statusGetter('state'),
+          set: statusSetter('state')
+        },
+        song : {
+          value: null,
+          writable: true,
+          enumerable: true,
+          get: statusGetter('song'),
+          set: statusSetter('song')
+        }
+      });
+      return status;
+    }
   };
 
 
